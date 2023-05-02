@@ -1,0 +1,23 @@
+{
+  "name": "tensorflow-facedetection",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "author": "Nico Martin <nico@sayhello.ch>",
+  "license": "ISC",
+  "devDependencies": {
+    "@preact/preset-vite": "^2.5.0",
+    "prettier": "^2.8.8",
+    "typescript": "^5.0.4",
+    "vite": "^4.3.3"
+  },
+  "dependencies": {
+    "@tensorflow-models/face-detection": "^1.0.2",
+    "@tensorflow/tfjs": "^4.4.0"
+  }
+}
