@@ -6,6 +6,8 @@
 }
 
 .loading {
+  display: block;
+  text-align: center;
 }
 
 .canvas {

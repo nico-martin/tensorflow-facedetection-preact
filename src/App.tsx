@@ -2,33 +2,28 @@ import { render, Fragment } from "preact";
 import { useState, useEffect } from "preact/hooks";
 
 import {
-  FaceDetector,
+  FaceLandmarksDetector,
   createDetector,
   SupportedModels,
-} from "@tensorflow-models/face-detection";
+} from "@tensorflow-models/face-landmarks-detection";
 import "@tensorflow/tfjs-backend-webgl";
 
 import styles from "./App.module.css";
 import Input from "./Input";
 import Canvas from "./Canvas";
 
-export enum DRAW_TYPE {
-  RECT = "rect",
-  GLASSES = "glases",
-}
-
 const App = () => {
-  const [detector, setDetector] = useState<FaceDetector>(null);
+  const [detector, setDetector] = useState<FaceLandmarksDetector>(null);
   const [activeFile, setActiveFile] = useState<File>(null);
-  const [draw, setDraw] = useState<DRAW_TYPE>(Object.values(DRAW_TYPE)[0]);
 
   const [bitmapImage, setBitmapImage] = useState<ImageBitmap>(null);
 
   useEffect(() => {
     setDetector(null);
-    createDetector(SupportedModels.MediaPipeFaceDetector, {
+    createDetector(SupportedModels.MediaPipeFaceMesh, {
       runtime: "tfjs",
-      maxFaces: 5,
+      refineLandmarks: true,
+      maxFaces: 3,
     }).then((d) => setDetector(d));
   }, []);
 
@@ -42,7 +37,7 @@ const App = () => {
   return (
     <div className={styles.wrapper}>
       {!detector ? (
-        <p>loading...</p>
+        <p className={styles.loading}>loading...</p>
       ) : (
         <Fragment>
           <div className={styles.options}>
@@ -52,22 +47,6 @@ const App = () => {
                 setActiveFile(file);
               }}
             />
-            <label>
-              Draw:{" "}
-              <select
-                onChange={(e) =>
-                  setDraw(
-                    (e.target as HTMLSelectElement).value === DRAW_TYPE.RECT
-                      ? DRAW_TYPE.RECT
-                      : DRAW_TYPE.GLASSES
-                  )
-                }
-              >
-                {Object.values(DRAW_TYPE).map((v) => (
-                  <option>{v}</option>
-                ))}
-              </select>
-            </label>
           </div>
           <div className={styles.output}>
             {bitmapImage && (
@@ -75,7 +54,6 @@ const App = () => {
                 className={styles.canvas}
                 image={bitmapImage}
                 detector={detector}
-                drawType={draw}
               />
             )}
           </div>
