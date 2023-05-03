@@ -1,3 +1,27 @@
+.wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 10vh 0;
+  flex-direction: column;
+}
+
+.loading {
+}
+
 .canvas {
   max-width: 100%;
+}
+
+.output {
+  text-align: center;
+}
+
+.options {
+  margin-bottom: 2vh;
+  display: flex;
+  justify-content: center;
+  gap: 2vh;
+}
+
+.imageInput {
 }
