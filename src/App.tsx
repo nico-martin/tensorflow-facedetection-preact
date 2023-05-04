@@ -59,6 +59,13 @@ const App = () => {
           </div>
         </Fragment>
       )}
+      <footer className={styles.footer}>
+        Source code:
+        <br />
+        <a href="https://github.com/nico-martin/tensorflow-facedetection-preact">
+          https://github.com/nico-martin/tensorflow-facedetection-preact
+        </a>
+      </footer>
     </div>
   );
 };

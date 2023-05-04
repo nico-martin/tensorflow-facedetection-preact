@@ -22,30 +22,10 @@ const Canvas: FC<{
     const ctx = canvas.getContext("2d");
 
     estimations.map((estimation) => {
-      const box = estimation.box;
-      const adjustmentUnit = box.width / 100;
-      /*
-      ctx.lineWidth = 5;
-      ctx.strokeStyle = "#22e624";
-      ctx.beginPath();
-      ctx.rect(box.xMin, box.yMin, box.width, box.height);
-      ctx.stroke();
-      ctx.closePath();
-       */
-
       const keypoints = estimation.keypoints;
       keypoints.map((point) => {
-        if (point.name) {
-          ctx.fillStyle = "#000000";
-        } else {
-          ctx.fillStyle = "#555555";
-        }
-        ctx.fillRect(
-          point.x,
-          point.y,
-          adjustmentUnit * 1.5,
-          adjustmentUnit * 1.5
-        );
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(point.x, point.y, 2, 2);
       });
     });
   };
