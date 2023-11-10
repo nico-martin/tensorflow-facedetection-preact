@@ -1,5 +1,4 @@
-import { FunctionComponent as FC } from "preact";
-import { useEffect, useRef } from "preact/hooks";
+import { FC, useEffect, useRef } from "react";
 import { Face } from "@tensorflow-models/face-landmarks-detection";
 import { MASK_TYPES, MASKS } from "./utils/constants";
 import { getAngle } from "./utils/helpers";
@@ -7,7 +6,7 @@ import { getAngle } from "./utils/helpers";
 const glassesImg: HTMLImageElement = new Image();
 glassesImg.src = "./glasses.png";
 
-const Canvas: FC<{
+const CanvasComp: FC<{
   width: number;
   height: number;
   className?: string;
@@ -74,7 +73,7 @@ const Canvas: FC<{
 
   useEffect(() => {
     redrawCanvas();
-  }, [faces, canvasRef]);
+  }, [faces]);
 
   return (
     <canvas
@@ -86,4 +85,4 @@ const Canvas: FC<{
   );
 };
 
-export default Canvas;
+export default CanvasComp;

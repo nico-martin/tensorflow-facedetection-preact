@@ -20,3 +20,15 @@ export const MASKS: Record<
     label: "Darth Vader",
   },
 };
+
+export enum TENSORFLOW_BACKENDS {
+  CPU = "cpu",
+  WEBGL = "webgl",
+  WEBGPU = "webgpu",
+}
+
+export const TENSORFLOW_BACKEND_LABELS: Record<TENSORFLOW_BACKENDS, string> = {
+  [TENSORFLOW_BACKENDS.CPU]: "CPU",
+  [TENSORFLOW_BACKENDS.WEBGL]: "WebGL",
+  [TENSORFLOW_BACKENDS.WEBGPU]: "WebGPU",
+};

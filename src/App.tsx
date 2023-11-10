@@ -1,24 +1,28 @@
-import { render } from "preact";
-import { useState, useEffect } from "preact/hooks";
+import { useState, useEffect, useMemo } from "react";
+import ReactDOM from "react-dom/client";
+import * as tfjs from "@tensorflow/tfjs";
+declare const tf: typeof tfjs;
 
 import {
-  FaceLandmarksDetector,
   createDetector,
-  SupportedModels,
   Face,
+  FaceLandmarksDetector,
+  SupportedModels,
 } from "@tensorflow-models/face-landmarks-detection";
-import "@tensorflow/tfjs-backend-webgl";
 
 import styles from "./App.module.css";
 import useWindowSize from "./utils/useWindowSize";
-import { MASK_TYPES } from "./utils/constants";
+import { MASK_TYPES, TENSORFLOW_BACKENDS } from "./utils/constants";
 import Canvas from "./Canvas";
 import WebcamVideo from "./WebcamVideo";
 import Options from "./Options";
 
 const App = () => {
   const [predictionsRunning, setPredictionsRunning] = useState<boolean>(false);
-  const [webcamVideo, setWebcamVideo] = useState<HTMLVideoElement>(null);
+  //const [doPredict, setDoPredict] = useState<boolean>(false);
+  const [webcamVideo, setWebcamVideo] = useState<
+    HTMLVideoElement | HTMLCanvasElement
+  >(null);
   const [estimations, setEstimations] = useState<Array<Face>>(null);
   const [videoSourceSize, setVideoSourceSize] = useState<{
     width: number;
@@ -29,6 +33,21 @@ const App = () => {
   const [videoSources, setVideoSources] = useState<Array<MediaDeviceInfo>>([]);
   const [activeMask, setActiveMask] = useState<MASK_TYPES>(null);
   const [currentCameraId, setCurrentCameraId] = useState<string>(null);
+  const [backend, setBackend] = useState<TENSORFLOW_BACKENDS>(
+    TENSORFLOW_BACKENDS.CPU
+  );
+  const [predictionTimestamps, setPredictionTimestamps] = useState<
+    Array<number>
+  >([]);
+
+  useEffect(() => {
+    console.log("set backend", backend);
+    // @ts-ignore
+    window.tf.setBackend(backend).then(() => {
+      // @ts-ignore
+      console.log("backend done", tf.getBackend());
+    });
+  }, [backend]);
 
   useEffect(() => {
     const windowAspectRatio = windowWidth / windowHeight;
@@ -48,24 +67,43 @@ const App = () => {
   useEffect(() => {
     if (!predictionsRunning && webcamVideo) {
       setPredictionsRunning(true);
+      console.log("create detector");
       createDetector(SupportedModels.MediaPipeFaceMesh, {
         runtime: "tfjs",
-        refineLandmarks: false,
+        refineLandmarks: true,
         maxFaces: 1,
       }).then((d) => doPredictions(webcamVideo, d));
     }
   }, [webcamVideo, predictionsRunning]);
 
+  const timeouts: Array<number> = useMemo(
+    () =>
+      predictionTimestamps
+        .map((timestamp, i) => {
+          if (predictionTimestamps[i + 1]) {
+            return predictionTimestamps[i + 1] - timestamp;
+          }
+          return null;
+        })
+        .filter((e) => e !== null),
+    [predictionTimestamps]
+  );
+
   const doPredictions = async (
-    video: HTMLVideoElement,
+    video: HTMLVideoElement | HTMLCanvasElement,
     detector: FaceLandmarksDetector
   ) => {
     try {
       const estimations = await detector.estimateFaces(video);
+      //console.log("estimations", estimations);
       setEstimations(estimations);
     } catch (e) {
       console.log(e);
     }
+    setPredictionTimestamps((timestamps) =>
+      [...timestamps, new Date().getTime()].slice(-10)
+    );
+
     requestAnimationFrame(() => doPredictions(video, detector));
   };
 
@@ -76,6 +114,7 @@ const App = () => {
         setCurrentCameraId={setCurrentCameraId}
         setActiveMask={setActiveMask}
         className={styles.options}
+        setBackend={setBackend}
       />
       <div className={styles.window}>
         <div
@@ -111,6 +150,18 @@ const App = () => {
         </div>
       </div>
       <footer className={styles.footer}>
+        {timeouts.length >= 0 && (
+          <p style={{ textAlign: "right" }}>
+            FPS:{" "}
+            {Math.round(
+              1000 /
+                Math.round(
+                  timeouts.reduce((acc, value) => acc + value, 0) /
+                    timeouts.length
+                )
+            )}
+          </p>
+        )}
         Created by{" "}
         <a href="https://nico.dev" target="_blank">
           Nico Martin
@@ -128,5 +179,8 @@ const App = () => {
   );
 };
 
-const app: HTMLDivElement = document.querySelector("#app") || null;
-app && render(<App />, app);
+// @ts-ignore
+window.tf.setBackend(TENSORFLOW_BACKENDS.WEBGL).then(() => {
+  const app = ReactDOM.createRoot(document.querySelector("#app"));
+  app && app.render(<App />);
+});

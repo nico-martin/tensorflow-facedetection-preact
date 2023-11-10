@@ -1,5 +1,4 @@
-import { FunctionComponent as FC } from "preact";
-import { useEffect, useRef, useState } from "preact/hooks";
+import { FC, useEffect, useRef, useState } from "react";
 
 const initWebcam = async (
   constraints: MediaStreamConstraints = {}
@@ -39,7 +38,7 @@ const WebcamVideo: FC<{
   setVideoSources: (sources: Array<MediaDeviceInfo>) => void;
   currentCameraId: string;
   setCurrentCameraId: (id: string) => void;
-  setWebcamVideo: (video: HTMLVideoElement) => void;
+  setWebcamVideo: (video: HTMLVideoElement | HTMLCanvasElement) => void;
 }> = ({
   width,
   height,
@@ -91,10 +90,10 @@ const WebcamVideo: FC<{
   return (
     <video
       ref={webcamRef}
-      className={className}
       width={width}
       height={height}
       playsInline
+      className={className}
     />
   );
 };
